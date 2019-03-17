@@ -3,3 +3,5 @@
 *.jl.mem
 .DS_Store
 /Manifest.toml
+test.ipynb
+.ipynb_checkpoints

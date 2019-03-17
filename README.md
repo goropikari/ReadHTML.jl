@@ -19,18 +19,27 @@ Pkg.pkg"add https://github.com/goropikari/ReadHTML.jl"
 ```julia
 julia> using ReadHTML
 
-julia> url = "https://gist.githubusercontent.com/goropikari/f02f29e61228a1249626a63187543fbc/raw/04310042022b194a83a2bed7a3c2195ad993f016/ex.html";
+julia> url = "https://gist.githubusercontent.com/goropikari/f02f29e61228a1249626a63187543fbc/raw/9ea21302243b9c57af7c6f18bbcd6e836d7f0219/ex.html";
+
+# | No 	| Competition | John  | Adam  | Robert | Paul  |
+# |----	|-------------|-------|-------|--------|-------|
+# | 1  	| Swimming    |  1:30 |  2:05 |   1:15 |  1:41 |
+# | 2  	| Running     | 15:30 | 14:10 |  15:45 | 16:00 |
+# | 3  	|             |   70% |   55% |    90% |   88% |
+
 
 julia> read_html(url)
-1-element Array{DataFrames.DataFrame,1}:
- 3×6 DataFrames.DataFrame. Omitted printing of 4 columns
+1-element Array{DataFrame,1}:
+ 3×6 DataFrame. Omitted printing of 4 columns
 │ Row │             No           │             Competition           │
-│     │ Union{Nothing, String}   │ Union{Nothing, String}            │
+│     │ Union{Missing, String}   │ Union{Missing, String}            │
 ├─────┼──────────────────────────┼───────────────────────────────────┤
 │ 1   │             1            │             Swimming              │
 │ 2   │             2            │             Running               │
-│ 3   │             3            │             Shooting              │
+│ 3   │             3            │                                   │
 ```
+
+
 
 This package doesn't support `colspan` and `rowspan`.
 If the headers of tables contain them, you should specify `header=false`.

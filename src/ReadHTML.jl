@@ -2,7 +2,7 @@ module ReadHTML
 
 using DataFrames, HTTP, Gumbo, AbstractTrees
 export gettables, gettablerow, extractdata, makerowdata, read_html, read_table
-const StrN = Union{String, Nothing}
+const StringMissing = Union{String, Missing}
 
 # url 中の全ての <table>~</table> を抜き出す。
 """
@@ -13,7 +13,7 @@ Extract all <table>~</table> contents.
 function gettables(url::String)
     data = String(HTTP.get(url).body)
     data = replace(data, "\n"=>"")
-    table_list = StrN[]
+    table_list = StringMissing[]
     offset = 1
     while true
         m = match(r"<table.*?>(.*?)</table>"s, data, offset)
@@ -34,7 +34,7 @@ end
 Extract row data of table.
 """
 function gettablerow(table, header)
-    l = StrN[]
+    l = StringMissing[]
     offset = 1
     while true
         m = match(r"<tr.*?>(.*?)</tr>"s, table, offset)
@@ -63,11 +63,11 @@ function extractdata(data)
             push!(str, elem.text)
         end
     end
-    return join(str)
+    return join(str, ' ')
 end
 
 function makerowdata(tr)
-    l = StrN[]
+    l = StringMissing[]
     offset = 1
     while true
         m = match(r"<t[dh].*?>(.*?)</t[dh]>"s, tr, offset)
@@ -88,7 +88,7 @@ function read_table(table; header=true)
     tr = trs[1]
     ncol = makerowdata(tr) |> length # Obtain the # of cols
     nrow = size(trs, 1)
-    arr = Matrix{StrN}(undef, nrow, ncol)
+    arr = Matrix{StringMissing}(undef, nrow, ncol)
     for (rowidx, tr) in enumerate(trs)
         rowdata = makerowdata(tr)
         for (colidx, colitem) in enumerate(rowdata)
