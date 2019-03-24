@@ -4,7 +4,6 @@ using DataFrames, HTTP, Gumbo, AbstractTrees
 export gettables, gettablerow, extractdata, makerowdata, read_html, read_table
 const StringMissing = Union{String, Missing}
 
-# url 中の全ての <table>~</table> を抜き出す。
 """
     gettables(url::String)
 
@@ -13,7 +12,7 @@ Extract all <table>~</table> contents.
 function gettables(url::String)
     data = String(HTTP.get(url).body)
     data = replace(data, "\n"=>"")
-    table_list = StringMissing[]
+    table_list = String[]
     offset = 1
     while true
         m = match(r"<table.*?>(.*?)</table>"s, data, offset)
@@ -27,11 +26,10 @@ function gettables(url::String)
     return table_list
 end
 
-# 表中の全ての行を抜き出す
 """
     gettablerow(table)
 
-Extract row data of table.
+Extract all row data of table.
 """
 function gettablerow(table, header)
     l = StringMissing[]
@@ -66,6 +64,11 @@ function extractdata(data)
     return join(str, ' ')
 end
 
+"""
+    makerowdata(tr)
+
+Extract row elements.
+"""
 function makerowdata(tr)
     l = StringMissing[]
     offset = 1
@@ -81,12 +84,26 @@ function makerowdata(tr)
     return l
 end
 
+"""
+    checknumrows(trs)
+
+Check how many rows there are.
+"""
+function checknumrows(trs)
+    tr = trs[1]
+    return length(makerowdata(tr))
+end
+
+"""
+    read_table(table; header=true)
+
+Read HTML table into DataFrame.
+"""
 function read_table(table; header=true)
     containheader = occursin("</th>", table)
     trs = gettablerow(table, header)
     isempty(trs) && return nothing
-    tr = trs[1]
-    ncol = makerowdata(tr) |> length # Obtain the # of cols
+    ncol = checknumrows(trs)
     nrow = size(trs, 1)
     arr = Matrix{StringMissing}(undef, nrow, ncol)
     for (rowidx, tr) in enumerate(trs)
@@ -102,9 +119,15 @@ function read_table(table; header=true)
             DataFrame(arr)
         end
     catch
+        return nothing
     end
 end
 
+"""
+    read_html(url; header=true)
+
+Obtain HTML tables from `url` and read them into DataFrame.
+"""
 function read_html(url; header=true)
     tables = gettables(url)
     dfs = DataFrame[]
